@@ -42,3 +42,5 @@ RAW_PATH is the directory containing tokenized files (../merged_stories_tokenize
 python preprocess.py -mode format_to_bert -raw_path JSON_PATH -save_path BERT_DATA_PATH  -lower -n_cpus 1 -log_file ../logs/preprocess.log
 </code></pre>
 JSON_PATH is the directory containing json files (../json_data), BERT_DATA_PATH is the target directory to save the generated binary files (../bert_data)
+
+.
