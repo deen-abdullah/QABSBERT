@@ -52,9 +52,15 @@ def load_json(p, lower):
 
     source = [clean(' '.join(sent)).split() for sent in source]
     tgt = [clean(' '.join(sent)).split() for sent in tgt]
-    source, query, tgt, sorting_status = orderingQuery (source, tgt, extractive = False, sequential = False) #Sequential = False for sorted sentences
 
-    return {'src': source, 'qry': query, 'tgt': tgt, 'status': sorting_status}
+    #print("Raw Source")
+    #print(source)
+    #source, query, tgt, sorting_status = orderingQuery (source, tgt, extractive = True)  # for query focused extractive then abstractive
+    source, query, tgt, sorting_status = orderingQuery (source, tgt, extractive = False)  # for only query focused abstractive
+    #print('Sorted Source')
+    #print(source)
+
+    return source, query, tgt, sorting_status
 
 
 
@@ -308,7 +314,7 @@ def _format_to_bert(params):
     jobs = json.load(open(json_file))
     datasets = []
     for d in jobs:
-        source, tgt = d['src'], d['tgt']
+        source, qry, tgt, status = d['src'], d['qry'], d['tgt'], d['status']
 
         sent_labels = greedy_selection(source[:args.max_src_nsents], tgt, 3)
         if (args.lower):
@@ -321,9 +327,10 @@ def _format_to_bert(params):
         if (b_data is None):
             continue
         src_subtoken_idxs, sent_labels, tgt_subtoken_idxs, segments_ids, cls_ids, src_txt, tgt_txt = b_data
+
         b_data_dict = {"src": src_subtoken_idxs, "tgt": tgt_subtoken_idxs,
                        "src_sent_labels": sent_labels, "segs": segments_ids, 'clss': cls_ids,
-                       'src_txt': src_txt, "tgt_txt": tgt_txt}
+                       'src_txt': src_txt, 'qry_txt': qry, "tgt_txt": tgt_txt, "status": status}
         datasets.append(b_data_dict)
     logger.info('Processed instances %d' % len(datasets))
     logger.info('Saving to %s' % save_file)
@@ -381,8 +388,8 @@ def format_to_lines(args):
 def _format_to_lines(params):
     f, args = params
     print(f)
-    source, tgt, qry = load_json(f, args.lower)
-    return {'src': source, 'qry': qry, 'tgt': tgt}
+    source, query, tgt, sorting_status = load_json(f, args.lower)
+    return {'src': source, 'qry': query, 'tgt': tgt, 'status': sorting_status}
 
 
 
