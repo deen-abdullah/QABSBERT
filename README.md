@@ -5,6 +5,7 @@ This code is for INLG 2020 paper  [Towards Generating Query to Perform Query Foc
 Some codes are collected from the work of [Liu and Lapata](https://github.com/nlpyang/PreSumm)
 
 We conducted our experiment on TITAN X GPU (GTX Machine) and later we have uploaded our work on GitHub for general use.
+Experiment was run on Anaconda environment. Please install required packages.
 
 Our summarization framework has two parts, at first we pre-processed the source document according to the query by which we incorporated the query relevance to our QFAS task. Then, we used the [BERTSUM](https://github.com/nlpyang/PreSumm) model to generate abstractive summaries, where we fine-tuned the model with our pre-processed source documents.
 
