@@ -56,3 +56,30 @@ As an example:
 <pre><code>
 python preprocess.py -mode format_to_bert -raw_path ../json_data -save_path ../bert_data  -lower -n_cpus 1 -log_file ../logs/preprocess.log
 </code></pre>
+
+### **Newsroom Dataset (Abstractive/Mixed)**
+
+**Step 1 Download Dataset:** Download and unzip the dataset from [here](summari.es). To download full dataset, fill up the form in their website, then they will send the link to your email to download the full dataset.
+
+There are three parts in the dataset (dev.jsonl.gz;  test.jsonl.gz; train.jsonl.gz). Put them in one directory (e.g. ../raw_stories)
+
+**Step 2. Download Stanford CoreNLP:** We will need Stanford CoreNLP to tokenize the data. Download it [here](https://stanfordnlp.github.io/CoreNLP/) and unzip it. Then add the following command to your bash_profile:
+<pre><code>
+export CLASSPATH=/path/to/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9.2.jar
+</code></pre>
+replacing /path/to/ with the path to where you saved the stanford-corenlp-full-2018-10-05 directory.
+
+As an example:
+<pre><code>
+export CLASSPATH=/home/user/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9.2.jar
+</code></pre>
+
+**Step 5. Execute Command:**
+For Abstractive Dataset of Newsroom:
+<pre><code>
+python preprocessNewsroom.py abstractive
+</code></pre>
+For Mixed Dataset of Newsroom:
+<pre><code>
+python preprocessNewsroom.py mixed
+</code></pre>
