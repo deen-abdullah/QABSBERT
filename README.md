@@ -59,7 +59,7 @@ python preprocess.py -mode format_to_bert -raw_path ../json_data -save_path ../b
 
 ### **Newsroom Dataset (Abstractive/Mixed)**
 
-**Step 1 Download Dataset:** Download and unzip the dataset from [here](summari.es). To download full dataset, fill up the form in their website, then they will send the link to your email to download the full dataset.
+**Step 1 Download Dataset:** Download and unzip the dataset from [here](https://summari.es). To download full dataset, fill up the form in their website, then they will send the link to your email to download the full dataset.
 
 There are three parts in the dataset (dev.jsonl.gz;  test.jsonl.gz; train.jsonl.gz). Put them in one directory (e.g. ../raw_stories)
 
@@ -74,7 +74,8 @@ As an example:
 export CLASSPATH=/home/user/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9.2.jar
 </code></pre>
 
-**Step 5. Execute Command:**
+**Step 3. Execute Command:**
+
 For Abstractive Dataset of Newsroom:
 <pre><code>
 python preprocessNewsroom.py abstractive
