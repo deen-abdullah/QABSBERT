@@ -1,7 +1,7 @@
 #
 # The purpose of this program is to generate dataset for query focused abstractive summary from NEWSROOM dataset
 # Input: Dataset from NEWSROOM
-# Output: Dataset for query focused abstractive summary
+# Output: Dataset for query focused abstractive/mixed summary
 # Author: Deen Mohammad Abdullah
 # Date: October, 2019
 #
@@ -77,7 +77,7 @@ def writeFile (entry, entryNo, targetFile, types):
 	if (targetFile == 'dev'):
 		targetFile = 'valid'
 	for type in types:
-		directory = "dataset/"+targetFile+"/"+type
+		directory = "../dataset/"+targetFile+"/"+type
 		if not os.path.exists(directory):
 			os.makedirs(directory)
 		fquery = open(directory+"/"+ str(entryNo) +".txt", "w")
@@ -97,7 +97,7 @@ def writeFile (entry, entryNo, targetFile, types):
 def load_json(corpus_type, fileNumber):
     source = []
     tgt = []
-    p = "tokenized/"+corpus_type+"/"
+    p = "../merged_stories_tokenized/"+corpus_type+"/"
     q = str(fileNumber)+".txt.json"
     for sent in json.load(open(p+"document/"+q))['sentences']:
         tokens = [t['word'] for t in sent['tokens']]
@@ -118,25 +118,25 @@ def load_json(corpus_type, fileNumber):
 # Parameter: targetFiles -> {'train', 'valid', 'test'}
 # Return:
 def formatToLines(targetFiles):
-	if not os.path.exists("json_data"):
-		os.makedirs("json_data")
+	if not os.path.exists("../json_data"):
+		os.makedirs("../json_data")
 
 	# change it to : 'train', 'valid', 'test'
 	for corpus_type in targetFiles:
 		dataset = []
 		p_ct = 0
-		numberOfFiles = len(os.listdir("tokenized/"+corpus_type+"/summary"))
+		numberOfFiles = len(os.listdir("../merged_stories_tokenized/"+corpus_type+"/summary"))
 		for fileNumber in range (1, numberOfFiles):
 			d = load_json(corpus_type, fileNumber)
 			dataset.append(d)
 			if (len(dataset) > 2000):
-				pt_file = "{:s}.{:s}.{:d}.json".format("json_data/newsroom", corpus_type, p_ct)
+				pt_file = "{:s}.{:s}.{:d}.json".format("../json_data/newsroom", corpus_type, p_ct)
 				with open(pt_file, 'w') as save:
 					save.write(json.dumps(dataset))
 					p_ct += 1
 					dataset = []
 		if (len(dataset) > 0):
-				pt_file = "{:s}.{:s}.{:d}.json".format("json_data/newsroom", corpus_type, p_ct)
+				pt_file = "{:s}.{:s}.{:d}.json".format("../json_data/newsroom", corpus_type, p_ct)
 				with open(pt_file, 'w') as save:
 					save.write(json.dumps(dataset))
 					p_ct += 1
@@ -157,15 +157,15 @@ def tokenize (targetFiles):
 	types = {'document', 'summary'}
 	for targetFile in targetFiles:
 		for type in types:
-			directory = os.listdir("dataset/"+targetFile+"/"+type)
-			tokenized_dir = "tokenized/"+targetFile+"/"+type
+			directory = os.listdir("../dataset/"+targetFile+"/"+type)
+			tokenized_dir = "../merged_stories_tokenized/"+targetFile+"/"+type
 			if not os.path.exists(tokenized_dir):
 				os.makedirs(tokenized_dir)
 			with open("mapping_for_corenlp.txt", "w") as f:
 				for d in directory:
 					if (not d.endswith('txt')):
 						continue
-					f.write("%s\n" % (os.path.join("dataset/"+targetFile+"/"+type, d)))
+					f.write("%s\n" % (os.path.join("../dataset/"+targetFile+"/"+type, d)))
 			command = ['java', 'edu.stanford.nlp.pipeline.StanfordCoreNLP', '-annotators', 'tokenize,ssplit', '-ssplit.newlineIsSentenceBreak', 'always', '-filelist', 'mapping_for_corenlp.txt', '-outputFormat', 'json', '-outputDirectory', tokenized_dir]
 			subprocess.call(command)
 			os.remove("mapping_for_corenlp.txt")
@@ -309,17 +309,17 @@ def greedy_selection(doc_sent_list, abstract_sent_list, summary_size):
 #			  Output --
 # Return:
 def formatToBert(targetFiles):
-	if not os.path.exists("bert_data"):
-		os.makedirs("bert_data")
+	if not os.path.exists("../bert_data"):
+		os.makedirs("../bert_data")
 	max_src_nsents = 100
 	for corpus_type in targetFiles:
 		is_test = corpus_type == 'test'
 		bert = BertData()
 
-		for json_f in glob.glob(pjoin("json_data", '*' + corpus_type + '.*.json')):
+		for json_f in glob.glob(pjoin("../json_data", '*' + corpus_type + '.*.json')):
 			jobs = json.load(open(json_f))
 			real_name = json_f.split('/')[-1]
-			save_file = pjoin("bert_data", real_name.replace('json', 'bert.pt'))
+			save_file = pjoin("../bert_data", real_name.replace('json', 'bert.pt'))
 			datasets = []
 			for d in jobs:
 				source, tgt = d['src'], d['tgt']
@@ -344,29 +344,34 @@ def formatToBert(targetFiles):
 #				    --
 #			  Output --
 # Return:
-def main () :
-	abstractive = 0
-	#targetFiles = {'test','dev','train'}  # "test" or "train" or "dev"
-	targetFiles = {'test', 'train', 'dev'}  # "test" or "train" or "dev"
+if __name__ == "__main__":
+	datasetType = "abstractive"
+	if len(sys.argv) is 2: 
+		datasetType = sys.argv[1]
 
+	summary = 0
+
+	my_dir = "../raw_stories/"
+	targetFiles = {'test', 'train', 'dev'}
+
+	
 	for targetFile in targetFiles:
 		count = 0
-		with jsonl.open(targetFile+".jsonl.gz", gzip = True) as file:
+		with jsonl.open(my_dir + targetFile + ".jsonl.gz", gzip = True) as file:
 			for entry in file:
-				if entry["density_bin"] == "mixed":
+				if entry["density_bin"] == datasetType:
 					if numberOfSentence(entry['summary']) > 1:
 						count = count + 1
 						writeFile(entry, count, targetFile, {'document', 'summary'})
-
-		abstractive = abstractive + count
-
+						
+		summary = summary + count
+	
 	targetFiles = {'test', 'train', 'valid'}
 	tokenize(targetFiles)
 	formatToLines(targetFiles)
 	formatToBert(targetFiles)
 
-	print ("Number of summary " + str (abstractive))
+	print ("Number of summary " + str (summary))
 	print ("Done ! ! !")
+	
 
-# Executable statements:
-main()
