@@ -84,3 +84,49 @@ For Mixed Dataset of Newsroom:
 <pre><code>
 python preprocessNewsroom.py mixed
 </code></pre>
+
+### **Debatepedia Dataset**
+
+**Step 1 Download Dataset:** Download dataset from [here](https://github.com/PrekshaNema25/DiverstiyBasedAttentionMechanism/tree/master/data).
+
+There are six files in the dataset (test_content, test_summary, train_content, train_summary, valid_content, valid_summary). Put them in one directory (e.g. ../raw_stories)
+
+**Step 2. Download Stanford CoreNLP:** We will need Stanford CoreNLP to tokenize the data. Download it [here](https://stanfordnlp.github.io/CoreNLP/) and unzip it. Then add the following command to your bash_profile:
+<pre><code>
+export CLASSPATH=/path/to/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9.2.jar
+</code></pre>
+replacing /path/to/ with the path to where you saved the stanford-corenlp-full-2018-10-05 directory.
+
+As an example:
+<pre><code>
+export CLASSPATH=/home/user/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9.2.jar
+</code></pre>
+
+**Step 3. Execute Command:**
+
+<pre><code>
+python preprocessDebatepedia.py
+</code></pre>
+
+## **Model Training**
+We followed [BERTSUM](https://github.com/nlpyang/PreSumm) for the model training.
+
+First run: For the first time, you should use single-GPU, so the code can download the BERT model. Use -visible_gpus -1, after downloading, you could kill the process and rerun the code with multi-GPUs.
+
+Replace XYZ with {cnndm | newsroom | debatepedia}
+
+Run the following command: (After downloading BERT model, kill the process)
+<pre><code>
+python train.py  -task abs -mode train -bert_data_path ../bert_data/XYZ -dec_dropout 0.2  -model_path ../models -sep_optim true -lr_bert 0.002 -lr_dec 0.2 -save_checkpoint_steps 2000 -batch_size 140 -train_steps 200000 -report_every 50 -accum_count 5 -use_bert_emb true -use_interval true -warmup_steps_bert 20000 -warmup_steps_dec 10000 -max_pos 512 -visible_gpus -1  -log_file ../logs/abs_bert_XYZ
+</code></pre>
+
+Finally run the following command:
+<pre><code>
+python train.py  -task abs -mode train -bert_data_path ../bert_data/XYZ -dec_dropout 0.2  -model_path ../models -sep_optim true -lr_bert 0.002 -lr_dec 0.2 -save_checkpoint_steps 2000 -batch_size 140 -train_steps 200000 -report_every 50 -accum_count 5 -use_bert_emb true -use_interval true -warmup_steps_bert 20000 -warmup_steps_dec 10000 -max_pos 512 -visible_gpus 0  -log_file ../logs/abs_bert_XYZ
+</code></pre>
+
+## **Model Evaluation**
+
+<pre><code>
+python train.py -task abs -mode validate -test_all -batch_size 3000 -test_batch_size 500 -bert_data_path ../bert_data/XYZ -log_file ../logs/val_abs_bert_XYZ -model_path ../models -sep_optim true -use_interval true -visible_gpus 0 -max_pos 512 -max_length 200 -alpha 0.95 -min_length 50 -result_path ../logs/abs_bert_XYZ
+</code></pre>
