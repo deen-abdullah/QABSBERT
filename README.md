@@ -9,7 +9,12 @@ Experiment was run on Anaconda environment. Please install required packages.
 
 Our summarization framework has two parts, at first we pre-processed the source document according to the query by which we incorporated the query relevance to our QFAS task. Then, we used the [BERTSUM](https://github.com/nlpyang/PreSumm) model to generate abstractive summaries, where we fine-tuned the model with our pre-processed source documents.
 
+Create a directory, namely 'logs' in the same directory where you have downloaded QABSBERT.
+
 ## **Pre-processing / Dataset Preparation**
+Prepare only one dataset at a time: CNN/DailyMail or Debatepedia or Abstractive(Newsroom) or Mixed (Newsroom) and complete the full experiment.
+
+For another dataset, we have to download the project and do the steps from the beginning.
 
 ### **CNN/DailyMail Dataset**
 
